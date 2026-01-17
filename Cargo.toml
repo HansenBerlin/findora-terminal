@@ -1,0 +1,15 @@
+[package]
+name = "findora-terminal"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+# Linux RC522 reader (SPI)
+rc522 = ["dep:mfrc522", "dep:linux-embedded-hal"]
+
+[dependencies]
+uuid = { version = "1", features = ["v5"] }
+
+# Only pulled in when feature "rc522" is enabled
+mfrc522 = { version = "0.8", optional = true }
+linux-embedded-hal = { version = "0.4", features = ["spi"], optional = true }
