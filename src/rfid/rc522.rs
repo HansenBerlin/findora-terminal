@@ -1,17 +1,17 @@
 use crate::rfid::{RfidEvent, RfidReader};
 use linux_embedded_hal::spidev::{SpiModeFlags, SpidevOptions};
-use linux_embedded_hal::SpidevDevice;
+use linux_embedded_hal::{SpidevDevice, SysfsPin};
 use mfrc522::comm::blocking::spi::SpiInterface;
-use mfrc522::Mfrc522;
+use mfrc522::{Initialized, Mfrc522};
 use std::thread;
 use std::time::Duration;
 
 pub struct Rc522Reader {
-    rfid: Mfrc522<SpiInterface<SpidevDevice>>,
+    rfid: Mfrc522<SpiInterface<SpidevDevice, SysfsPin>, Initialized>,
 }
 
 impl Rc522Reader {
-    pub fn new(spidev_path: &str, max_speed_hz: u32) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new(spidev_path: &str, max_speed_hz: u32, rst_gpio: u64) -> Result<Self, Box<dyn std::error::Error>> {
         let mut spi = SpidevDevice::open(spidev_path)?;
 
         let options = SpidevOptions::new()
@@ -22,7 +22,10 @@ impl Rc522Reader {
 
         spi.0.configure(&options)?;
 
-        let itf = SpiInterface::new(spi);
+        // RC522 reset pin (RST on module) via sysfs GPIO
+        let rst = SysfsPin::new(rst_gpio);
+        let itf = SpiInterface::new(spi, rst);
+
         let rfid = Mfrc522::new(itf)
             .init()
             .map_err(|e| format!("{e:?}"))?;

@@ -17,7 +17,11 @@ pub fn create_default_reader() -> Result<Box<dyn RfidReader>, Box<dyn std::error
     Ok(Box::new(rc522::Rc522Reader::new("/dev/spidev0.0", 1_000_000)?))
 }
 
-#[cfg(not(all(target_os = "linux", feature = "rc522")))]
+#[cfg(all(target_os = "linux", feature = "rc522"))]
 pub fn create_default_reader() -> Result<Box<dyn RfidReader>, Box<dyn std::error::Error>> {
-    Ok(Box::new(sim::SimReader::new()))
+    Ok(Box::new(rc522::Rc522Reader::new(
+        "/dev/spidev0.0",
+        1_000_000,
+        25, // RST wired to GPIO25
+    )?))
 }
