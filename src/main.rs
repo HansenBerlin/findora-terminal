@@ -7,7 +7,7 @@ use tokio::time::sleep;
 use uuid::Uuid;
 
 const API_URL: &str = "http://127.0.0.1:8000/rfid"; // change
-
+// rev
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // SPI device: CE0 => /dev/spidev0.0
