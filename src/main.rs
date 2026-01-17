@@ -15,7 +15,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .collect::<Vec<_>>()
                     .join(":");
 
-                // Deterministic UUID derived from UID bytes (UUID v5)
                 let u = Uuid::new_v5(&Uuid::NAMESPACE_OID, &uid_bytes);
                 println!("{uid_hex} -> {u}");
             }
