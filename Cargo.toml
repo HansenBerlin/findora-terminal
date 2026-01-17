@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
-reqwest = { version = "0.13.1", features = ["json", "rustls-tls"] }
+reqwest = { version = "0.13.1", features = ["json"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v4", "v5"] }
 linux-embedded-hal = { version = "0.4", features = ["spi"] }

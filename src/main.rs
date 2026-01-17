@@ -5,9 +5,8 @@ use mfrc522::Mfrc522;
 use std::time::Duration;
 use tokio::time::sleep;
 use uuid::Uuid;
+use std::env;
 
-//const API_URL: &str = "http://127.0.0.1:8000/rfid"; // change
-// rev
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
@@ -69,10 +68,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                 let full_api_url = format!("{endpoint}/api/game/new");
                 if let Some(u) = parsed_uuid {
-                    // example async POST (JSON)
                     let resp = client
                         .post(full_api_url)
-                        .json(&serde_json::json!({ "uuid": u.to_string() }))
                         .send()
                         .await;
 
