@@ -1,14 +1,12 @@
 [package]
 name = "findora-terminal"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
-uuid = { version = "1", features = ["v5"] }
-
-# Linux (Pi) hardware reader
-rppal = { version = "0.22", optional = true }
-rppal_mfrc522 = { version = "0.4.1", optional = true }
-
-[features]
-hw = ["rppal", "rppal_mfrc522"]
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+reqwest = { version = "0.13.1", features = ["json", "rustls-tls"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "v5"] }
+linux-embedded-hal = { version = "0.4", features = ["spi"] }
+mfrc522 = "0.8"
