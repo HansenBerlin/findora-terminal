@@ -1,23 +1,14 @@
-mod rfid;
+mod reader;
 
-use rfid::{RfidEvent, RfidReader};
 use uuid::Uuid;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut reader = rfid::create_default_reader()?;
+    let mut r = reader::create()?;
 
     loop {
-        match reader.next_event()? {
-            RfidEvent::Uid(uid_bytes) => {
-                let uid_hex = uid_bytes
-                    .iter()
-                    .map(|b| format!("{:02X}", b))
-                    .collect::<Vec<_>>()
-                    .join(":");
-
-                let u = Uuid::new_v5(&Uuid::NAMESPACE_OID, &uid_bytes);
-                println!("{uid_hex} -> {u}");
-            }
-        }
+        let uid = r.next_uid()?; // raw UID bytes (4 bytes for hw reader; sim can be any)
+        let hex = uid.iter().map(|b| format!("{:02X}", b)).collect::<Vec<_>>().join(":");
+        let uuid = Uuid::new_v5(&Uuid::NAMESPACE_OID, &uid);
+        println!("{hex} -> {uuid}");
     }
 }

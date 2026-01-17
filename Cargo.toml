@@ -1,13 +1,14 @@
 [package]
 name = "findora-terminal"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 uuid = { version = "1", features = ["v5"] }
 
-mfrc522 = { version = "0.8", optional = true }
-linux-embedded-hal = { version = "0.4", features = ["spi"], optional = true }
+# Linux (Pi) hardware reader
+rppal = { version = "0.22", optional = true }
+rppal_mfrc522 = { version = "0.4.1", optional = true }
 
 [features]
-rc522 = ["mfrc522", "linux-embedded-hal"]
+hw = ["rppal", "rppal_mfrc522"]
