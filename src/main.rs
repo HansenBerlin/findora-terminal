@@ -6,10 +6,16 @@ use std::time::Duration;
 use tokio::time::sleep;
 use uuid::Uuid;
 
-const API_URL: &str = "http://127.0.0.1:8000/rfid"; // change
+//const API_URL: &str = "http://127.0.0.1:8000/rfid"; // change
 // rev
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+
+    dotenvy::dotenv().ok();
+
+    let endpoint = env::var("BUTTON_API_ENDPOINT")
+        .map_err(|_| "Environment variable BUTTON_API_TEAM_ENDPOINT was not found. ")?;
+
     // SPI device: CE0 => /dev/spidev0.0
     let mut spi = SpidevDevice::open("/dev/spidev0.0")?;
 
@@ -61,10 +67,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         .unwrap_or_else(|| "<not-a-uuid>".to_string())
                 );
 
+                let full_api_url = format!("{endpoint}/api/game/new");
                 if let Some(u) = parsed_uuid {
                     // example async POST (JSON)
                     let resp = client
-                        .post(API_URL)
+                        .post(full_api_url)
                         .json(&serde_json::json!({ "uuid": u.to_string() }))
                         .send()
                         .await;
@@ -75,15 +82,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                             // Try to print a response body (best-effort)
                             let body = r.text().await.unwrap_or_default();
-
-                            if body.is_empty() {
-                                println!("POST {API_URL} -> {status}");
-                            } else {
-                                println!("POST {API_URL} -> {status} | {body}");
-                            }
+                            println!("Status: {}", status);
                         }
                         Err(e) => {
-                            eprintln!("POST error: {e}");
+                            eprintln!("POST error: {}", e);
                         }
                     }
                 }

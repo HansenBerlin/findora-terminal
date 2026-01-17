@@ -10,3 +10,4 @@ serde_json = "1"
 uuid = { version = "1", features = ["v4", "v5"] }
 linux-embedded-hal = { version = "0.4", features = ["spi"] }
 mfrc522 = "0.8"
+dotenvy = "0.15.7"
