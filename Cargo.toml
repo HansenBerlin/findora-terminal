@@ -4,8 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-reqwest = { version = "0.13.1", features = ["json", "blocking"] }
 uuid = { version = "1", features = ["v4", "v5"] }
 linux-embedded-hal = { version = "0.4", features = ["spi"] }
 mfrc522 = "0.8"
 dotenvy = "0.15.7"
+reqwest = { version = "0.13.1", features = ["json"] }
+serde = { version = "1.0.152", features = ["derive"] }
+tokio = { version = "1.24.1", features = ["rt-multi-thread", "macros", "time"] }
