@@ -2,6 +2,7 @@ use rppal::gpio::Gpio;
 use std::time::Duration;
 use std::env;
 use reqwest::Client;
+use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION};
 use std::error::Error;
 use serde::Serialize;
 
@@ -22,12 +23,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let endpoint = env::var("BUTTON_API_ENDPOINT")
         .map_err(|_| "BUTTON_API_ENDPOINT not set")?;
+    let api_key = env::var("BUTTON_API_KEY")
+        .map_err(|_| "BUTTON_API_KEY not set")?;
+
+    let mut headers = HeaderMap::new();
+    headers.insert(AUTHORIZATION, HeaderValue::from_str(&format!("Bearer {api_key}"))?);
+
+    let client = Client::builder()
+        .default_headers(headers)
+        .build()?;
+
     let base_url = format!("{endpoint}/api/");
     let health_url = format!("{base_url}health");
     let new_game_url = format!("{base_url}game/new");
     let stop_game_url = format!("{base_url}game/stop");
 
-    let client = Client::new();
     client
         .get(&health_url)
         .send()
@@ -67,7 +77,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 Err(e) => println!("Failed to start game: {e}"),
             }
 
-            // debounce — wait for release + settle
             while blue_button.is_low() {
                 tokio::time::sleep(Duration::from_millis(20)).await;
             }
