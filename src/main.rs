@@ -7,7 +7,7 @@ use std::error::Error;
 use serde::Serialize;
 
 #[allow(non_snake_case)]
-#[derive(Serialize)]
+#[derive(Serialize, Debug, Clone)]
 pub struct NewGameRequest {
     pub redTeamName: String,
     pub blueTeamName: String,
@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .map_err(|_| "BUTTON_API_KEY not set")?;
 
     let mut headers = HeaderMap::new();
-    headers.insert(AUTHORIZATION, HeaderValue::from_str(&format!("Bearer {api_key}"))?);
+    headers.insert("authorization", HeaderValue::from_str(&format!("{api_key}"))?);
 
     let client = Client::builder()
         .default_headers(headers)
@@ -59,22 +59,29 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if blue_button.is_low() && !game_active {
             println!("BLUE pressed — starting new game...");
 
-            let res = client
-                .post(&new_game_url)
-                .json(&NewGameRequest {
-                    redTeamName: "red".to_string(),
-                    blueTeamName: "blue".to_string(),
-                    gameLength: 300,
-                })
-                .send()
-                .await?;
+            let request = NewGameRequest {
+                redTeamName: "red".to_string(),
+                blueTeamName: "blue".to_string(),
+                gameLength: 300,
+            };
 
-            match res.error_for_status() {
-                Ok(_) => {
-                    game_active = true;
-                    println!("Game started.");
-                }
-                Err(e) => println!("Failed to start game: {e}"),
+            println!("{:?}", request);
+
+
+            match client
+                .post(&new_game_url)
+                .json(&request)
+                .send()
+                .await
+            {
+                Ok(res) => match res.error_for_status() {
+                    Ok(_) => {
+                        game_active = true;
+                        println!("Game started.");
+                    }
+                    Err(e) => println!("Failed to start game: {e}"),
+                },
+                Err(e) => println!("Failed to send start request: {e}"),
             }
 
             while blue_button.is_low() {
@@ -86,18 +93,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if red_button.is_low() && game_active {
             println!("RED pressed — stopping game...");
 
-            let res = client
+            match client
                 .post(&stop_game_url)
                 .send()
-                .await?;
-
-            match res.error_for_status() {
-                Ok(_) => {
-                    game_active = false;
-                    println!("Game stopped.");
-                }
-                Err(e) => println!("Failed to stop game: {e}"),
+                .await
+            {
+                Ok(res) => match res.error_for_status() {
+                    Ok(_) => println!("Game stopped."),
+                    Err(e) => println!("Failed to stop game: {e}"),
+                },
+                Err(e) => println!("Failed to send stop request: {e}"),
             }
+
+            game_active = false;
 
             while red_button.is_low() {
                 tokio::time::sleep(Duration::from_millis(20)).await;
